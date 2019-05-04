@@ -7,41 +7,51 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 
 import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 
 @Component(role = EventSpy.class, hint = "memory-profiler", description = "Capture forked test JVM memory usage")
-public class MyProfilerEventSpy extends AbstractEventSpy {
+public class ProfilerEventSpy extends AbstractEventSpy {
 
     @Requirement
     private Logger logger;
+    private Profiler profiler;
 
-    public MyProfilerEventSpy(Logger logger) {
-        this.logger = logger;
-    }
-
-    public MyProfilerEventSpy() {
-
+    public ProfilerEventSpy() {
+		profiler = new Profiler();
     }
 
     @Override
     public void init(Context context) throws Exception {
         super.init(context);
-        System.out.println("PROFILER STARTING");
         logger.info("ProfilerEventSpy is registered.");
-//        Profiler profiler = new Profiler();
-//        Thread thread = new Thread(profiler);
-//        thread.start();
     }
 
     @Override
     public void onEvent(Object event) throws Exception {
         super.onEvent(event);
-        logger.info("Event: " + event.getClass() + " - " + event.toString());
+
+        if (!(event instanceof ExecutionEvent)) {
+            return;
+        }
+
+		ExecutionEvent executionEvent = (ExecutionEvent)event;
+        if (executionEvent.getMojoExecution() == null) {
+        	return;
+		}
+
+		String phase = executionEvent.getMojoExecution().getLifecyclePhase();
+		logger.info("ExecutionEvent: " + phase);
+
+		if (phase.equals("test")) {
+			if (!profiler.isProfiling()) {
+				profiler.start();
+			} else {
+				profiler.stop();
+			}
+		}
     }
 
     @Override
     public void close() throws Exception {
         super.close();
-        System.out.println("PROFILER DONE");
     }
 }

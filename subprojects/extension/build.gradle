@@ -3,6 +3,8 @@ repositories {
 }
 
 dependencies {
+	implementation project(':maven-memory-profile-core')
+	implementation 'org.codehaus.groovy:groovy:2.5.6'
 	implementation "org.apache.maven:maven-core:$mavenVersion"
 	implementation 'org.codehaus.plexus:plexus-component-annotations:2.0.0'
 	runtime 'ch.qos.logback:logback-classic:1.2.3'
