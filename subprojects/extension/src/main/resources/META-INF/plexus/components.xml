@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set>
+  <components>
+	<component>
+	  <role>org.apache.maven.eventspy.EventSpy</role>
+	  <role-hint>memory-profiler</role-hint>
+	  <implementation>com.thecodesmith.maven.memory.profile.MyProfilerEventSpy</implementation>
+	  <description>Capture forked test JVM memory usage</description>
+	  <isolated-realm>false</isolated-realm>
+	  <requirements>
+		<requirement>
+		  <role>org.codehaus.plexus.logging.Logger</role>
+		  <field-name>logger</field-name>
+		</requirement>
+	  </requirements>
+	</component>
+  </components>
+</component-set>

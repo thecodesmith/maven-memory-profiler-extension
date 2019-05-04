@@ -1,1 +1,7 @@
 rootProject.name = 'maven-memory-profile-extension'
+
+include ':maven-memory-profile-core'
+include ':maven-memory-profile-extension'
+
+project(':maven-memory-profile-core').projectDir = file('subprojects/core')
+project(':maven-memory-profile-extension').projectDir = file('subprojects/extension')
