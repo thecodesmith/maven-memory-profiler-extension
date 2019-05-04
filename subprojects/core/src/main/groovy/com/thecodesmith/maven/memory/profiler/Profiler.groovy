@@ -1,4 +1,4 @@
-package com.thecodesmith.maven.memory.profile
+package com.thecodesmith.maven.memory.profiler
 
 import groovy.util.logging.Slf4j
 

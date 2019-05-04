@@ -1,4 +1,4 @@
-package com.thecodesmith.maven.memory.profile;
+package com.thecodesmith.maven.memory.profiler;
 
 import org.apache.maven.eventspy.AbstractEventSpy;
 import org.apache.maven.eventspy.EventSpy;

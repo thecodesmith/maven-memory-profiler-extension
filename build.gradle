@@ -3,7 +3,7 @@ ext {
 }
 
 task build {
-    dependsOn ':maven-memory-profile-extension:build'
+    dependsOn ':maven-memory-profiler-extension:build'
 }
 
 subprojects {

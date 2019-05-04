@@ -4,7 +4,7 @@
 	<component>
 	  <role>org.apache.maven.eventspy.EventSpy</role>
 	  <role-hint>memory-profiler</role-hint>
-	  <implementation>com.thecodesmith.maven.memory.profile.ProfilerEventSpy</implementation>
+	  <implementation>com.thecodesmith.maven.memory.profiler.ProfilerEventSpy</implementation>
 	  <description>Capture forked test JVM memory usage</description>
 	  <isolated-realm>false</isolated-realm>
 	  <requirements>

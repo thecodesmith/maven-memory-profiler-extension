@@ -1,7 +1,7 @@
-rootProject.name = 'maven-memory-profile-extension'
+rootProject.name = 'maven-memory-profiler-extension'
 
-include ':maven-memory-profile-core'
-include ':maven-memory-profile-extension'
+include ':maven-memory-profiler-core'
+include ':maven-memory-profiler-extension'
 
-project(':maven-memory-profile-core').projectDir = file('subprojects/core')
-project(':maven-memory-profile-extension').projectDir = file('subprojects/extension')
+project(':maven-memory-profiler-core').projectDir = file('subprojects/core')
+project(':maven-memory-profiler-extension').projectDir = file('subprojects/extension')
