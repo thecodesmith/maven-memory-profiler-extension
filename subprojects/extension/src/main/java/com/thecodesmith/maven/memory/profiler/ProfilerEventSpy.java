@@ -22,7 +22,7 @@ public class ProfilerEventSpy extends AbstractEventSpy {
     @Override
     public void init(Context context) throws Exception {
         super.init(context);
-        logger.info("ProfilerEventSpy is registered.");
+        logger.info("Memory profiler extension registered");
     }
 
     @Override
@@ -39,12 +39,13 @@ public class ProfilerEventSpy extends AbstractEventSpy {
 		}
 
 		String phase = executionEvent.getMojoExecution().getLifecyclePhase();
-		logger.info("ExecutionEvent: " + phase);
 
 		if (phase.equals("test")) {
 			if (!profiler.isProfiling()) {
+                logger.debug("Event phase 'test', starting memory profiler");
 				profiler.start();
 			} else {
+                logger.debug("Event phase 'test', stopping memory profiler");
 				profiler.stop();
 			}
 		}

@@ -25,6 +25,14 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
+                <configuration>
+                    <argLine>
+                        -Dcom.sun.management.jmxremote
+                        -Dcom.sun.management.jmxremote.port=9123
+                        -Dcom.sun.management.jmxremote.authenticate=false
+                        -Dcom.sun.management.jmxremote.ssl=false
+                    </argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>

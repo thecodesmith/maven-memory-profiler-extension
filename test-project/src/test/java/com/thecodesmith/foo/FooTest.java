@@ -1,12 +1,15 @@
 package com.thecodesmith.foo;
 
+import java.lang.Thread;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestFoo {
     @Test
-    void addition() {
+    void addition() throws Exception {
+        System.out.println("Long-running test...");
+        Thread.sleep(5000);
         assertEquals(2, 1 + 1);
     }
 }
