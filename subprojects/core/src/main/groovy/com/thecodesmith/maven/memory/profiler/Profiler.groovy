@@ -13,26 +13,85 @@ import groovy.util.logging.Slf4j
 
 @Slf4j
 class Profiler {
-    private int port = 9123
-    private String url = "service:jmx:rmi:///jndi/rmi://localhost:$port/jmxrmi"
 	private AtomicBoolean status = new AtomicBoolean(false)
 	private Thread thread
     private JmxServer connection = null
+
+    String getUrl(Long port) {
+        "service:jmx:rmi:///jndi/rmi://localhost:$port/jmxrmi"
+    }
 
 	boolean isProfiling() {
 		status.get()
 	}
 
+	Long getMavenPid() {
+	    try {
+            def id = ManagementFactory.runtimeMXBean.name - ~/@.*/
+            log.info "Maven process ID: $id"
+	        return Long.parseLong(id)
+	    } catch (e) {
+	        log.debug "Error parsing Maven process ID: $e"
+	        return -1
+	    }
+	}
+
+	List<Long> getForkedPids(Long pid) {
+        List<Long> ids = "pgrep -P $pid"
+                .execute()
+                .text.trim()
+                .tokenize()
+                .collect { Long.parseLong(it.trim()) }
+	}
+
+	List<Long> getForkedJmxPorts(Long pid) {
+	    def process = ['sh', '-c', "lsof -nP -i4TCP | grep LISTEN | grep $pid"].execute()
+	    process.waitFor()
+        def ports = process.text
+                .tokenize('\n')
+                .collect { Long.parseLong(it.tokenize().get(8) - ~/^.*:/) }
+        ports
+	}
+
 	void start() {
 		log.info 'Starting memory profiler'
+		def mavenPid = getMavenPid()
 		thread = Thread.start {
 			status.set(true)
 			log.debug 'Profiler running in new thread'
 			while (status.get()) {
-			    checkMemory()
-			    sleep 1000
+			    try {
+			        def pids = getForkedPids(mavenPid).collect { pid ->
+                        getForkedPids(pid)
+                    }.flatten()
+                    log.info "[Maven PID $mavenPid] Forked PIDs: $pids"
+                    def ports = pids.collectEntries { pid ->
+                        def ports = getForkedJmxPorts(pid)
+                        def port = ports.find { isValidJmxPort(it) }
+                        [(pid): port]
+			        }
+			        log.info "JMX ports by PID: $ports"
+			        if (ports.size() > 1) {
+                        log.warn 'More than one JMX port found, connecting to the first one'
+			        }
+                    checkMemory(ports.find().value)
+			    } catch (e) {
+			        log.info "Failed to get JMX port: $e.message"
+			        log.debug "Failed to get JMX port: $e"
+			    }
+			    sleep 2000
 			}
 		}
+	}
+
+	boolean isValidJmxPort(Long port) {
+	    try {
+	        connect(port)
+	        return true
+	    } catch (e) {
+	        log.warn "Invalid JMX port: $port"
+	        return false
+	    }
 	}
 
 	void stop() {
@@ -41,14 +100,17 @@ class Profiler {
 		thread.join()
 	}
 
-	protected void checkMemory() {
+	protected void checkMemory(Long port) {
         try {
-            log.debug 'Checking memory usage via JMX'
+            log.info 'Checking memory usage via JMX'
+            def server = getServer(port)
+            log.info "Successfully connected to server: $server"
             def usage = queryMemoryUsage(server)
             def percentage = (usage.used / usage.max * 100.0).round(1)
             log.info "[$timestamp] $usage.used/$usage.max - $percentage %"
         } catch (e) {
-            log.debug "JMX connection failed: $e"
+            log.info "JMX connection failed: $e"
+            // e.printStackTrace()
         }
 	}
 
@@ -74,16 +136,21 @@ class Profiler {
         gcs
     }
 
-    protected JmxServer getServer() {
+    protected JmxServer getServer(Long port) {
         if (!connection) {
-            connection = connect()
+            connection = connect(port)
         }
         connection
     }
 
-    protected JmxServer connect() {
-        log.debug "Connecting to JMX at $url"
-        JmxFactory.connect(new JmxUrl(url)).MBeanServerConnection
+    protected JmxServer connect(Long port) {
+        def url = getUrl(port)
+        log.info "Connecting to JMX at $url"
+        def server = JmxFactory.connect(new JmxUrl(url))
+        log.info "Successfully connected to JMX: $server"
+        def mbeanServer = server.MBeanServerConnection
+        log.info "Successfully acquired connection: $mbeanServer"
+        mbeanServer
     }
 
 	protected String getTimestamp() {

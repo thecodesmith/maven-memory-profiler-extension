@@ -9,7 +9,7 @@ class TestFoo {
     @Test
     void addition() throws Exception {
         System.out.println("Long-running test...");
-        Thread.sleep(5000);
+        Thread.sleep(600000);
         assertEquals(2, 1 + 1);
     }
 }
